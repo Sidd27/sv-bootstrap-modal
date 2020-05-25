@@ -27,6 +27,7 @@
     "rollup-plugin-terser": "^5.1.2",
     "svelte": "^3.0.0"
   },
+  "license": "Apache-2.0",
   "keywords": [
     "svelte",
     "bootstrap",
