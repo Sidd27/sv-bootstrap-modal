@@ -3,7 +3,7 @@ Svelte Modal Component for Bootstrap (Bootstrap’s modal plugin in svlete appli
 ### Demo
 [Simple Bootstrap Modal Example](https://svelte.dev/repl/27a9b36c6b2a48fb9c98fd9358a8861e?version=3.22.3)
 ## How to install
-```npm install --save-dev sv-bootstrap```
+```npm install --save-dev sv-bootstrap-modal```
 
 ### Requirements
 Bootstrap CSS needs to be present globally in project
