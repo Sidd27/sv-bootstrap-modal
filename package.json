@@ -14,7 +14,8 @@
   "svelte": "src/main.js",
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "bootstrap": "4.5.0"
