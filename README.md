@@ -1,4 +1,4 @@
-# sv-bootstrap-modal
+# sv-bootstrap-modal (Svelte Bootstrap Modal)
 Svelte Modal Component for Bootstrap (Bootstrap’s modal plugin in svlete applications), can be used with sapper or standalone with svelte
 ### Demo
 [Simple Bootstrap Modal Example](https://svelte.dev/repl/27a9b36c6b2a48fb9c98fd9358a8861e?version=3.22.3)
