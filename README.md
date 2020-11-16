@@ -102,3 +102,6 @@ Add `modal-dialog-scrollable` to `dialogClasses` option
 |describedby|string|""|Used for aria-describedby|
 |onOpened|function|Empty function(noop)|Can be Used for callbacks After Modal Opened|
 |onClosed|function|Empty function(noop)|Can be Used for callbacks After Modal Closed|
+
+## License
+[Apache License 2.0](https://github.com/Sidd27/sv-bootstrap-modal/blob/master/LICENSE)
