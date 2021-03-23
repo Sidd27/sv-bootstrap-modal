@@ -29,7 +29,7 @@ Bootstrap CSS needs to be present globally in project
     </div>
     <div class="modal-body">Woohoo, you're reading this text in a modal!</div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary">Close</button>
+        <button type="button" class="btn btn-secondary" on:click={() => (isOpen = false)}>Close</button>
         <button type="button" class="btn btn-primary">Save changes</button>
     </div>
 </Modal>
