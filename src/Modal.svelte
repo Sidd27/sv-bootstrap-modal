@@ -1,41 +1,56 @@
 <script>
-  import { fade, fly } from "svelte/transition";
-  import { quintOut } from "svelte/easing";
+  import { fade, fly } from 'svelte/transition';
+  import { quintOut } from 'svelte/easing';
 
-  const noop = () => {};
+  const FOCUSABLE = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(', ');
 
-  export let open = false;
-  export let dialogClasses = "";
-  export let backdrop = true;
-  export let ignoreBackdrop = false;
-  export let keyboard = true;
-  export let describedby = "";
-  export let labelledby = "";
-  export let onOpened = noop;
-  export let onClosed = noop;
+  let {
+    open = $bindable(false),
+    dialogClasses = '',
+    backdrop = true,
+    ignoreBackdrop = false,
+    keyboard = true,
+    describedby = '',
+    labelledby = '',
+    onOpened = () => {},
+    onClosed = () => {},
+    animated = true,
+    zIndex = undefined,
+    children,
+  } = $props();
 
+  let modalEl = $state(null);
   let _keyboardEvent;
+  let _previousFocus;
+
+  const modalFadeParams = $derived(animated ? {} : { duration: 0 });
+  const dialogInParams = $derived(
+    animated ? { y: -50, duration: 300 } : { y: 0, duration: 0 }
+  );
+  const dialogOutParams = $derived(
+    animated
+      ? { y: -50, duration: 300, easing: quintOut }
+      : { y: 0, duration: 0 }
+  );
+  const backdropParams = $derived(
+    animated ? { duration: 150 } : { duration: 0 }
+  );
+  const backdropZIndex = $derived(zIndex != null ? zIndex - 5 : undefined);
 
   function attachEvent(target, ...args) {
     target.addEventListener(...args);
-    return {
-      remove: () => target.removeEventListener(...args)
-    };
+    return { remove: () => target.removeEventListener(...args) };
   }
 
-  function checkClass(className) {
-    return document.body.classList.contains(className);
-  }
-
-  function modalOpen() {
-    if (!checkClass("modal-open")) {
-      document.body.classList.add("modal-open");
-    }
-  }
-  function modalClose() {
-    if (checkClass("modal-open")) {
-      document.body.classList.remove("modal-open");
-    }
+  function getFocusable() {
+    return modalEl ? Array.from(modalEl.querySelectorAll(FOCUSABLE)) : [];
   }
 
   function handleBackdrop(event) {
@@ -45,11 +60,32 @@
     }
   }
 
+  function handleBackdropKey(event) {
+    if (keyboard && event.key === 'Escape') {
+      open = false;
+    }
+  }
+
   function onModalOpened() {
+    _previousFocus = document.activeElement;
+    (getFocusable()[0] ?? modalEl)?.focus();
+
     if (keyboard) {
-      _keyboardEvent = attachEvent(document, "keydown", e => {
-        if (event.key === "Escape") {
+      _keyboardEvent = attachEvent(document, 'keydown', (e) => {
+        if (e.key === 'Escape') {
           open = false;
+        } else if (e.key === 'Tab') {
+          const els = getFocusable();
+          if (!els.length) return;
+          const first = els[0];
+          const last = els[els.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
         }
       });
     }
@@ -59,25 +95,28 @@
   function onModalClosed() {
     if (_keyboardEvent) {
       _keyboardEvent.remove();
+      _keyboardEvent = null;
     }
+    _previousFocus?.focus();
     onClosed();
   }
 
-  // Watching changes for Open vairable
-  $: {
+  // Manage body class reactively; cleanup fn covers the destroy-while-open case
+  $effect(() => {
     if (open) {
-      modalOpen();
-    } else {
-      modalClose();
+      document.body.classList.add('modal-open');
+      return () => document.body.classList.remove('modal-open');
     }
-  }
-</script>
+  });
 
-<style>
-  .modal {
-    display: block;
-  }
-</style>
+  // Safety-net cleanup on unmount (e.g. route change while modal is open)
+  $effect(() => {
+    return () => {
+      document.body.classList.remove('modal-open');
+      _keyboardEvent?.remove();
+    };
+  });
+</script>
 
 {#if open}
   <div
@@ -87,21 +126,33 @@
     aria-labelledby={labelledby}
     aria-describedby={describedby}
     aria-modal="true"
-    on:click|self={handleBackdrop}
-    on:introend={onModalOpened}
-    on:outroend={onModalClosed}
-    transition:fade>
+    style:z-index={zIndex}
+    onclick={handleBackdrop}
+    onkeydown={handleBackdropKey}
+    onintroend={onModalOpened}
+    onoutroend={onModalClosed}
+    bind:this={modalEl}
+    transition:fade={modalFadeParams}
+  >
     <div
       class="modal-dialog {dialogClasses}"
-      role="document"
-      in:fly={{ y: -50, duration: 300 }}
-      out:fly={{ y: -50, duration: 300, easing: quintOut }}>
+      in:fly={dialogInParams}
+      out:fly={dialogOutParams}
+    >
       <div class="modal-content">
-        <slot />
+        {@render children?.()}
       </div>
     </div>
   </div>
-  {#if open}
-    <div class="modal-backdrop show" transition:fade={{ duration: 150 }} />
-  {/if}
+  <div
+    class="modal-backdrop show"
+    style:z-index={backdropZIndex}
+    transition:fade={backdropParams}
+  ></div>
 {/if}
+
+<style>
+  .modal {
+    display: block;
+  }
+</style>

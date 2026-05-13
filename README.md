@@ -1,107 +1,109 @@
-# sv-bootstrap-modal (Svelte Bootstrap Modal)
-Svelte Modal Component for Bootstrap (Bootstrap’s modal plugin in svlete applications), can be used with sapper or standalone with svelte
+# sv-bootstrap-modal
+
+Bootstrap 5 modal component for Svelte 5.
+
 ### Demo
-[Simple Bootstrap Modal Example](https://svelte.dev/repl/27a9b36c6b2a48fb9c98fd9358a8861e?version=3.22.3)
-## How to install
-```npm install --save-dev sv-bootstrap-modal```
+
+[Live demo](https://sidd27.github.io/sv-bootstrap-modal/)
+
+## Installation
+
+```bash
+npm install sv-bootstrap-modal
+```
 
 ### Requirements
-Bootstrap CSS needs to be present globally in project
 
+- Node >= 24
+- Svelte 5
+- Bootstrap 5 CSS included globally in your project
 
 ## Usage
 
-### Simple Usage
+### Basic
 
-#### Example
-```html
+```svelte
 <script>
-  import Modal from "sv-bootstrap-modal";
-  let isOpen = false;
+  import Modal from 'sv-bootstrap-modal';
+  let isOpen = $state(false);
 </script>
+
+<button class="btn btn-primary" onclick={() => (isOpen = true)}
+  >Open Modal</button
+>
 
 <Modal bind:open={isOpen}>
-    <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
-        <button type="button" class="close" on:click={() => (isOpen = false)}>
-        <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body">Woohoo, you're reading this text in a modal!</div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" on:click={() => (isOpen = false)}>Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-    </div>
+  <div class="modal-header">
+    <h5 class="modal-title">Modal title</h5>
+    <button type="button" class="btn-close" onclick={() => (isOpen = false)}
+    ></button>
+  </div>
+  <div class="modal-body">Modal body text.</div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      onclick={() => (isOpen = false)}>Close</button
+    >
+    <button type="button" class="btn btn-primary">Save changes</button>
+  </div>
 </Modal>
-
-<button class="btn btn-primary" on:click={()=> (isOpen = true)}>Open Modal</button>
-
 ```
 
-### Modal Sizing
-Below are the classes which should be used to change the sizes of modal
-|Small|Large|Extra large|
-|---|---|---|
-|  .modal-sm |  .modal-lg | .modal-xl  |
+### Sizing
 
-#### Example
-```html
-<script>
-  import Modal from "sv-bootstrap-modal";
-  let isOpen = false;
-</script>
+Pass Bootstrap dialog classes via `dialogClasses`:
 
-<Modal bind:open={isOpen} dialogClasses="modal-lg">
-    ....
-</Modal>
+| Size        | Class      |
+| ----------- | ---------- |
+| Small       | `modal-sm` |
+| Large       | `modal-lg` |
+| Extra large | `modal-xl` |
 
-<button class="btn btn-primary" on:click={()=> (isOpen = true)}>Open Modal</button>
+```svelte
+<Modal bind:open={isOpen} dialogClasses="modal-lg">...</Modal>
 ```
 
 ### Vertically centered
-Add `modal-dialog-centered` to `dialogClasses` option
 
-#### Example
-```html
-<script>
-  import Modal from "sv-bootstrap-modal";
-  let isOpen = false;
-</script>
-
-<Modal bind:open={isOpen} dialogClasses="modal-dialog-centered">
-    ....
-</Modal>
-
-<button class="btn btn-primary" on:click={()=> (isOpen = true)}>Open Modal</button>
+```svelte
+<Modal bind:open={isOpen} dialogClasses="modal-dialog-centered">...</Modal>
 ```
 
-### Scrolling long content (Scrollable Modal)
-Add `modal-dialog-scrollable` to `dialogClasses` option
+### Scrollable
 
-```html
-<script>
-  import Modal from "sv-bootstrap-modal";
-  let isOpen = false;
-</script>
-
-<Modal bind:open={isOpen} dialogClasses="modal-dialog-scrollable">
-    ....
-</Modal>
-
-<button class="btn btn-primary" on:click={()=> (isOpen = true)}>Open Modal</button>
+```svelte
+<Modal bind:open={isOpen} dialogClasses="modal-dialog-scrollable">...</Modal>
 ```
 
-### Component Options
-|Name|Type|Default|Description|
-|--- |--- |--- |--- |
-|backdrop|boolean|true|Includes a modal-backdrop element.|
-|ignoreBackdrop|boolean|true|It will ignore backdrop click close if `true` modal will not close on outside click|
-|keyboard|boolean|true|Closes the modal when escape key is pressed|
-|dialogClasses|string|""|You can add any number of classes to `.modal-dialog` element|
-|labelledby|string|""|Used for aria-labelledby|
-|describedby|string|""|Used for aria-describedby|
-|onOpened|function|Empty function(noop)|Can be Used for callbacks After Modal Opened|
-|onClosed|function|Empty function(noop)|Can be Used for callbacks After Modal Closed|
+### No animation
+
+```svelte
+<Modal bind:open={isOpen} animated={false}>...</Modal>
+```
+
+## Props
+
+| Name             | Type       | Default     | Description                                                 |
+| ---------------- | ---------- | ----------- | ----------------------------------------------------------- |
+| `open`           | `boolean`  | `false`     | Controls modal visibility; use `bind:open`                  |
+| `backdrop`       | `boolean`  | `true`      | Renders the backdrop overlay                                |
+| `ignoreBackdrop` | `boolean`  | `false`     | When `true`, clicking the backdrop does not close the modal |
+| `keyboard`       | `boolean`  | `true`      | Closes the modal on Escape key                              |
+| `animated`       | `boolean`  | `true`      | Enables fade/fly transitions                                |
+| `zIndex`         | `number`   | `undefined` | Override z-index on the modal (backdrop gets `zIndex - 5`)  |
+| `dialogClasses`  | `string`   | `""`        | Extra classes added to `.modal-dialog`                      |
+| `labelledby`     | `string`   | `""`        | `aria-labelledby` value                                     |
+| `describedby`    | `string`   | `""`        | `aria-describedby` value                                    |
+| `onOpened`       | `function` | `() => {}`  | Callback fired after the modal finishes opening             |
+| `onClosed`       | `function` | `() => {}`  | Callback fired after the modal finishes closing             |
+
+## Accessibility
+
+- Focus moves to the first focusable element (or the modal itself) on open and returns to the previously focused element on close.
+- Tab and Shift+Tab are trapped within the modal while it is open.
+- Escape closes the modal when `keyboard` is `true`.
 
 ## License
+
 [Apache License 2.0](https://github.com/Sidd27/sv-bootstrap-modal/blob/master/LICENSE)
