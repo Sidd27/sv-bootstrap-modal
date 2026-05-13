@@ -1,3 +1,7 @@
+<script module>
+  let openModalCount = 0;
+</script>
+
 <script>
   import { fade, fly } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
@@ -101,20 +105,20 @@
     onClosed();
   }
 
-  // Manage body class reactively; cleanup fn covers the destroy-while-open case
+  // Counter-based body class: nested modals won't strip the class while any modal is still open
   $effect(() => {
     if (open) {
-      document.body.classList.add('modal-open');
-      return () => document.body.classList.remove('modal-open');
+      if (++openModalCount === 1) document.body.classList.add('modal-open');
+      return () => {
+        if (--openModalCount === 0)
+          document.body.classList.remove('modal-open');
+      };
     }
   });
 
-  // Safety-net cleanup on unmount (e.g. route change while modal is open)
+  // Safety-net keyboard cleanup on unmount
   $effect(() => {
-    return () => {
-      document.body.classList.remove('modal-open');
-      _keyboardEvent?.remove();
-    };
+    return () => _keyboardEvent?.remove();
   });
 </script>
 

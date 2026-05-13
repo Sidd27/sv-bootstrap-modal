@@ -119,6 +119,23 @@ describe('callbacks', () => {
   });
 });
 
+describe('nested modals', () => {
+  it('keeps modal-open on body when inner modal closes but outer is still open', async () => {
+    const outer = render(Modal, { open: true });
+    const inner = render(Modal, { open: true });
+    await tick();
+    expect(document.body).toHaveClass('modal-open');
+
+    await inner.rerender({ open: false });
+    await tick();
+    expect(document.body).toHaveClass('modal-open');
+
+    await outer.rerender({ open: false });
+    await tick();
+    expect(document.body).not.toHaveClass('modal-open');
+  });
+});
+
 describe('z-index', () => {
   it('applies zIndex style when provided', async () => {
     render(Modal, { open: true, zIndex: 2000 });
